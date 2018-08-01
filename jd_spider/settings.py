@@ -74,6 +74,7 @@ ROBOTSTXT_OBEY = False
 MYEXT_ENABLED=True      # 开启扩展
 IDLE_NUMBER=3           # 配置空闲持续时间单位为 360个 ，一个时间单位为5s
 
+#扩展顺序不像中间件的顺序那么重要，而且扩展之间一般没有关联。 扩展加载的顺序并不重要，因为它们并不相互依赖。Extensions都设置成500
 EXTENSIONS = {
    # 'scrapy.extensions.telnet.TelnetConsole': None,
    'jd_spider.extensions.RedisSpiderSmartIdleClosedExensions': 500,

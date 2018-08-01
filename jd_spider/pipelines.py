@@ -42,7 +42,11 @@ class MongoPipeline(object):
     def process_item(self, item, spider):
         name = item.__class__.__name__
         #根据item的collectiom名存储进相应的collection
-        self.db[name].insert(dict(item))
+        # self.db[name].insert(dict(item))
+
+        # 存在就更新否则插入新的
+        self.db[name].update({'id': item.get('id')},{'$set':item},True)
+
 
     def close_spider(self,spider):
         self.client.close()

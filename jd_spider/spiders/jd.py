@@ -55,29 +55,13 @@ class JdSpider(RedisSpider):
 
     def parse(self, response):
         """构造搜索结果的请求"""
-        for page in range(1,5,2):
+        for page in range(1,3,2):
             obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
             # print(obvious_url)
             referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
             self.headers['Referer'] = referer
             yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
                           meta={'page': page})
-
-    # def start_requests(self):
-    #     '''对关键字发送请求获得搜索结果'''
-    #     for page in range(1,3,2):
-    #         obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
-    #         # print(obvious_url)
-    #         referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
-    #         self.headers['Referer'] = referer
-    #         yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
-    #                       meta={'page':page})
-
-    def random_delay(self):
-        '''随机延时'''
-        # delay = 0.5+random.random() * 1
-        # sleep(delay)
-        pass
 
     def obvious_page_s(self,page):
         '''生成搜索结果页前30条商品对应的s值'''
@@ -86,15 +70,6 @@ class JdSpider(RedisSpider):
     def scroll_page_s(self,page):
         '''生成搜索结果页需要下拉才显示出来的后30条商品对应的s值'''
         return 27+int(48*(page-1))
-
-    # def start_requests(self):
-    #     '''对某一个商品，发起查询评论的请求'''
-    #     gid = '3904935'
-    #     for i in range(self.comment_page_num):  # 10000
-    #         url = self.comments_url.format(gid, i)
-    #         print('comments url:', url)
-    #         self.random_delay()
-    #         yield Request(url, self.parse_comments_page, dont_filter=True, meta={'gid': gid})
 
     def parse_obvious_page(self, response):
         '''解析搜索结果页'''
@@ -111,7 +86,6 @@ class JdSpider(RedisSpider):
             for i in range(self.comment_page_num):#10000
                 url = self.comments_url.format(id, i)
                 print('comments url:', url)
-                self.random_delay()
                 yield Request(url, self.parse_comments_page, dont_filter=True,meta={'gid':id})
 
         #构造出scroll_page的url
@@ -132,10 +106,11 @@ class JdSpider(RedisSpider):
             for i in range(self.comment_page_num):  # 10000
                 url = self.comments_url.format(id, i)
                 print('comments url:', url)
-                self.random_delay()
+
                 yield Request(url, self.parse_comments_page, dont_filter=True,meta={'gid':id})
 
     def parse_comments_page(self,response):
+        '''解析评论'''
         print('*'*200)
         print(response.text)
         comments = response.body.decode('gbk')
