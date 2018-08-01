@@ -18,8 +18,7 @@ import logging
 from scrapy.log import logger
 from scrapy_redis.spiders import RedisSpider
 
-
-class JdSpider(RedisSpider):
+class JdSpider(scrapy.Spider):
     name = 'jd_sp'
     redis_key = 'Jingdong:start_requests'
 
@@ -30,7 +29,7 @@ class JdSpider(RedisSpider):
                  '5340538,2988013,13491803521,5934907,4215862,3904935,1133876941,1765895881,3866873,12534105241,' \
                  '2986763,14107231664,10839746256,4488645,2768837,10103996040,3618695,10575932237,18186401837,' \
                  '11212347766,11955924339,4488515,5381078,2952697,6004883,1498253,11265018045,3563660,4281170,5463278'
-    scroll_url =  'https://search.jd.com/s_new.php?keyword=%E8%80%B3%E6%9C%BA&enc=utf-8&qrst=1&rt=1&stop=1&vt=2&' \
+    scroll_url = 'https://search.jd.com/s_new.php?keyword=%E8%80%B3%E6%9C%BA&enc=utf-8&qrst=1&rt=1&stop=1&vt=2&' \
                  'wq=%E8%80%B3%E6%9C%BA&page={0}&s={1}&scrolling=y&log_id=1531030888.63562&tpl=3_M&show_items={2}'
     comments_url = 'https://sclub.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98vv18243&' \
                    'productId={0}&score=0&sortType=5&page={1}&pageSize=10&isShadowSku=0&fold=1'
@@ -50,12 +49,30 @@ class JdSpider(RedisSpider):
         # 'X-Requested-With': 'XMLHttpRequest'
     }
 
+    # start_urls = ['https://search.jd.com/Search?keyword=%E8%80%B3%E6%9C%BA&enc=utf-8&wq=%E8%80%B3%E6%9C%BA&pvid='
+    #               '58a7a5824d834bdc80a1290ed38eb1e4']
+    #要读取的评论页数
     comment_page_num = 100
+
+    # def parse(self, response):
+    #     '''主解析方法'''
+    #     if response.status not in [200]:
+    #         return
+    #     skus = response.xpath('//li[@class="gl-item"]/@data-sku').extract()
+    #     if skus:
+    #         for sku in skus:
+    #             url = 'https://item.jd.com/'+sku+'.html'
+    #             yield Request(url=url,callback=self.parse_detail)
+
+    def parse_detail(self,response):
+        '''解析商品详情页，获得商品评论数'''
+        pass
 
     def random_delay(self):
         '''随机延时'''
-        delay = 0.5+random.random() * 1
-        sleep(delay)
+        # delay = 0.5+random.random() * 1
+        # sleep(delay)
+        pass
 
     def obvious_page_s(self,page):
         '''生成搜索结果页前30条商品对应的s值'''
@@ -65,24 +82,24 @@ class JdSpider(RedisSpider):
         '''生成搜索结果页需要下拉才显示出来的后30条商品对应的s值'''
         return 27+int(48*(page-1))
 
-    # def start_requests(self):
-    #     '''对关键字发送请求获得搜索结果'''
-    #     for page in range(1,3,2):
-    #         obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
-    #         # print(obvious_url)
-    #         referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
-    #         self.headers['Referer'] = referer
-    #         yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
-    #                       meta={'page':page})
-
     def start_requests(self):
-        '''对某一个商品，发起查询评论的请求'''
-        id = '3904935'
-        for i in range(self.comment_page_num):  # 10000
-            url = self.comments_url.format(id, i)
-            print('comments url:', url)
-            self.random_delay()
-            yield Request(url, self.parse_comments_page, dont_filter=True, meta={'gid': id})
+        '''对关键字发送请求获得搜索结果'''
+        for page in range(1,3,2):
+            obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
+            # print(obvious_url)
+            referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
+            self.headers['Referer'] = referer
+            yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
+                          meta={'page':page})
+
+    # def start_requests(self):
+    #     '''对某一个商品，发起查询评论的请求'''
+    #     gid = '3904935'
+    #     for i in range(self.comment_page_num):  # 10000
+    #         url = self.comments_url.format(gid, i)
+    #         print('comments url:', url)
+    #         self.random_delay()
+    #         yield Request(url, self.parse_comments_page, dont_filter=True, meta={'gid': gid})
 
     def parse_obvious_page(self, response):
         '''解析搜索结果页'''
@@ -107,7 +124,6 @@ class JdSpider(RedisSpider):
         scroll_url = self.scroll_url.format(page*2,self.scroll_page_s(page),spu_string.strip(','))
         print(scroll_url)
         referer = self.search_referer.format(page * 2 - 1, self.obvious_page_s(page))
-        self.headers['Referer'] = referer
         yield Request(scroll_url,self.parse_scroll_page,dont_filter=True)
 
     def parse_scroll_page(self, response):
@@ -133,6 +149,8 @@ class JdSpider(RedisSpider):
         yield Request(url,self.parse_comments_page, dont_filter=True,meta={})
 
     def parse_comments_page(self,response):
+        print('*'*200)
+        print(response.text)
         comments = response.body.decode('gbk')
         jsonComments = comments[27:-2]
         data = json.loads(jsonComments)

@@ -101,10 +101,14 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"  #启用Redis调度存储请求队列
-SCHEDULER_PERSIST = True    #不清除Redis队列、这样可以暂停/恢复 爬取
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  #确保所有的爬虫通过Redis去重
-SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
-REDIS_HOST = 'localhost'  # 也可以根据情况改成 localhost
-REDIS_PORT = 6379
-REDIS_URL = None
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"  #启用Redis调度存储请求队列
+# SCHEDULER_PERSIST = True    #不清除Redis队列、这样可以暂停/恢复 爬取
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  #确保所有的爬虫通过Redis去重
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.SpiderPriorityQueue'
+# REDIS_HOST = 'localhost'  # 也可以根据情况改成 localhost
+# REDIS_PORT = 6379
+# REDIS_PARAMS = {
+#    # 'password': 在此设置密码,
+#    'db': 1
+# }
+# REDIS_URL = None
