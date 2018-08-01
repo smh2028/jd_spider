@@ -15,12 +15,11 @@ ffpath = os.path.abspath(os.path.join(fpath,".."))
 sys.path.append(ffpath)
 from jd_spider.items import GoodsItem
 import logging
-from scrapy.log import logger
 from scrapy_redis.spiders import RedisSpider
 
-class JdSpider(scrapy.Spider):
+class JdSpider(RedisSpider):
     name = 'jd_sp'
-    redis_key = 'Jingdong:start_requests'
+    redis_key = 'start_urls'
 
     search_result_url = 'https://search.jd.com/s_new.php?keyword=%E8%80%B3%E6%9C%BA&enc=utf-8&qrst=1&rt=1&stop=1&vt=2' \
                         '&wq=%E8%80%B3%E6%9C%BA&page={0}&s={1}&click=0'
@@ -49,24 +48,30 @@ class JdSpider(scrapy.Spider):
         # 'X-Requested-With': 'XMLHttpRequest'
     }
 
-    # start_urls = ['https://search.jd.com/Search?keyword=%E8%80%B3%E6%9C%BA&enc=utf-8&wq=%E8%80%B3%E6%9C%BA&pvid='
-    #               '58a7a5824d834bdc80a1290ed38eb1e4']
+    # start_urls = ['https://search.jd.com']
+
     #要读取的评论页数
     comment_page_num = 100
 
-    # def parse(self, response):
-    #     '''主解析方法'''
-    #     if response.status not in [200]:
-    #         return
-    #     skus = response.xpath('//li[@class="gl-item"]/@data-sku').extract()
-    #     if skus:
-    #         for sku in skus:
-    #             url = 'https://item.jd.com/'+sku+'.html'
-    #             yield Request(url=url,callback=self.parse_detail)
+    def parse(self, response):
+        """构造搜索结果的请求"""
+        for page in range(1,30,2):
+            obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
+            # print(obvious_url)
+            referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
+            self.headers['Referer'] = referer
+            yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
+                          meta={'page': page})
 
-    def parse_detail(self,response):
-        '''解析商品详情页，获得商品评论数'''
-        pass
+    # def start_requests(self):
+    #     '''对关键字发送请求获得搜索结果'''
+    #     for page in range(1,3,2):
+    #         obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
+    #         # print(obvious_url)
+    #         referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
+    #         self.headers['Referer'] = referer
+    #         yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
+    #                       meta={'page':page})
 
     def random_delay(self):
         '''随机延时'''
@@ -81,16 +86,6 @@ class JdSpider(scrapy.Spider):
     def scroll_page_s(self,page):
         '''生成搜索结果页需要下拉才显示出来的后30条商品对应的s值'''
         return 27+int(48*(page-1))
-
-    def start_requests(self):
-        '''对关键字发送请求获得搜索结果'''
-        for page in range(1,3,2):
-            obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
-            # print(obvious_url)
-            referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
-            self.headers['Referer'] = referer
-            yield Request(url=obvious_url, headers=self.headers, callback=self.parse_obvious_page, dont_filter=True,
-                          meta={'page':page})
 
     # def start_requests(self):
     #     '''对某一个商品，发起查询评论的请求'''
@@ -139,14 +134,6 @@ class JdSpider(scrapy.Spider):
                 print('comments url:', url)
                 self.random_delay()
                 yield Request(url, self.parse_comments_page, dont_filter=True,meta={'gid':id})
-
-
-    def start_comments_page_request(self,id,refer):
-        '''暂时弃用'''
-        self.headers['Referer'] = refer
-        url = self.comments_url.format(id,1)
-        print('comments url:',url)
-        yield Request(url,self.parse_comments_page, dont_filter=True,meta={})
 
     def parse_comments_page(self,response):
         print('*'*200)
