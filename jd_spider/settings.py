@@ -70,9 +70,14 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+
+MYEXT_ENABLED=True      # 开启扩展
+IDLE_NUMBER=3           # 配置空闲持续时间单位为 360个 ，一个时间单位为5s
+
+EXTENSIONS = {
+   # 'scrapy.extensions.telnet.TelnetConsole': None,
+   'jd_spider.extensions.RedisSpiderSmartIdleClosedExensions': 500,
+}
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
@@ -112,3 +117,6 @@ REDIS_PARAMS = {
    'db': 2
 }
 REDIS_URL = None
+
+
+

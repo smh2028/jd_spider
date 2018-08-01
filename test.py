@@ -34,4 +34,5 @@ h['Referer'] = 's'
 print(h)
 print(hearders)
 import logging
-logging._
+logging.getLogger('my').info('my info') # 并没有打印输出
+print(__name__) #结果是__main__
