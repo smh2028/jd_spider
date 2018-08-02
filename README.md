@@ -2,7 +2,27 @@
 
 scrapy,scrapy-redis,redis-py组成的scrapy的分布式爬虫，爬取京东搜索结果的商品评论。
 
+# 下载安装
 
+## 下载源码
+
+git clone https://github.com/smh2028/jd_spider.git
+
+## 安装依赖
+
+pip install -r requirements.txt
+
+## 启动
+
+配置redis start-urls
+
+`redis-cli
+
+LPUSH start_urls https://search.jd.com`
+
+在jd_spider/jd_spider/spiders目录下
+
+`scrapy crawl jd_sp`
 
 # 爬取逻辑
 
@@ -20,6 +40,8 @@ todo
 
 # 商品评论信息存储
 
-![1533130803741](C:\Users\smh\AppData\Local\Temp\1533130803741.png)
 
 
+# Requirements
+
+见requirements.txt
