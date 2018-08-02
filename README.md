@@ -6,7 +6,9 @@ scrapy,scrapy-redis,redis-py组成的scrapy的分布式爬虫，爬取京东搜�
 
 ## 下载源码
 
-git clone https://github.com/smh2028/jd_spider.git
+`git clone https://github.com/smh2028/jd_spider.git`
+
+或者在https://github.com/smh2028/jd_spider下载源码zip包。
 
 ## 安装依赖
 
@@ -16,17 +18,21 @@ pip install -r requirements.txt
 
 配置redis start-urls
 
-`redis-cli
+`redis-cli`
 
-LPUSH start_urls https://search.jd.com`
+`LPUSH start_urls https://search.jd.com`
 
 在jd_spider/jd_spider/spiders目录下
 
 `scrapy crawl jd_sp`
 
+单机分布式：windows下打开多个命令行，用相同的指令开启分布式爬取
+
+`scrapy crawl jd_sp`
+
 # 爬取逻辑
 
-从https://search.jd.com搜索关键字出发，比如搜索耳机，爬取搜索结果的前n页商品信息。
+从https://search.jd.com开始，搜索关键字出发，比如搜索耳机，爬取搜索结果的前n页商品信息。 
 
 # 反反爬策略
 
@@ -42,6 +48,3 @@ todo
 
 ![mongoresult](https://github.com/smh2028/jd_spider/blob/master/design/1533130803741.jpg)
 
-# Requirements
-
-见requirements.txt

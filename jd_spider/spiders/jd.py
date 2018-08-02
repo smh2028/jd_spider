@@ -55,7 +55,7 @@ class JdSpider(RedisSpider):
 
     def parse(self, response):
         """构造搜索结果的请求"""
-        for page in range(1,3,2):
+        for page in range(1,100,2):
             obvious_url = self.search_result_url.format(page*2-1, self.obvious_page_s(page))
             # print(obvious_url)
             referer = self.search_referer.format(page*2-1, self.obvious_page_s(page))
