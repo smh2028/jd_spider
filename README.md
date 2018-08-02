@@ -40,7 +40,7 @@ todo
 
 # 商品评论信息存储
 
-
+![mongoresult](https://github.com/smh2028/jd_spider/blob/master/design/1533130803741.jpg)
 
 # Requirements
 
